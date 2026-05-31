@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <title>Birthday Surprise</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f8fafc;
+      --soft: #cbd5e1;
+      --muted: #8ea0b8;
+      --line: rgba(255, 255, 255, 0.16);
+      --panel: rgba(10, 16, 30, 0.78);
+      --cyan: #54d8ff;
+      --pink: #ff6cae;
+      --green: #8cff8a;
+      --gold: #ffd36c;
+      --violet: #b5a7ff;
+      --shadow: rgba(0, 0, 0, 0.36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 10%, rgba(84, 216, 255, 0.22), transparent 26rem),
+        radial-gradient(circle at 82% 12%, rgba(255, 108, 174, 0.18), transparent 24rem),
+        radial-gradient(circle at 58% 92%, rgba(140, 255, 138, 0.13), transparent 30rem),
+        linear-gradient(145deg, #080b13 0%, #10172a 54%, #071415 100%);
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, calc(100vw - 40px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 32px 0 44px;
+      display: grid;
+      gap: 24px;
+      align-content: center;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .intro {
+      min-width: 0;
+      display: grid;
+      gap: 20px;
+    }
+
+    .tag {
+      width: fit-content;
+      border: 1px solid rgba(84, 216, 255, 0.38);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--cyan);
+      background: rgba(84, 216, 255, 0.08);
+      font: 13px/1.2 "SFMono-Regular", Consolas, monospace;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 11ch;
+      font-size: 86px;
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    .pink {
+      color: var(--pink);
+      text-shadow: 0 0 32px rgba(255, 108, 174, 0.30);
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 58ch;
+      color: #e2ebf7;
+      font-size: 20px;
+      line-height: 1.55;
+    }
+
+    .name-row {
+      display: grid;
+      grid-template-columns: minmax(0, 320px) max-content;
+      gap: 10px;
+      align-items: center;
+    }
+
+    label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    input {
+      width: min(320px, 100%);
+      height: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      border-radius: 8px;
+      padding: 0 14px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+      font: inherit;
+    }
+
+    input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 4px rgba(84, 216, 255, 0.14);
+    }
+
+    .primary,
+    .tab,
+    .tiny-button {
+      min-height: 48px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 16px;
+      color: #061016;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      font: 800 15px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(84, 216, 255, 0.18);
+    }
+
+    .primary:active,
+    .tab:active,
+    .tiny-button:active {
+      transform: translateY(1px);
+    }
+
+    .gift-art {
+      position: relative;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+        rgba(10, 16, 30, 0.54);
+      box-shadow: 0 30px 80px var(--shadow);
+      overflow: hidden;
+    }
+
+    .gift-art::before {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 211, 108, 0.24), transparent 68%);
+      filter: blur(2px);
+    }
+
+    .gift {
+      position: relative;
+      width: 190px;
+      height: 160px;
+      transform: rotate(-2deg);
+      animation: float 3.4s ease-in-out infinite;
+    }
+
+    .gift .lid,
+    .gift .box {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ff6cae, #ff9b6a);
+      box-shadow: 0 18px 40px rgba(255, 108, 174, 0.26);
+    }
+
+    .gift .lid {
+      top: 0;
+      height: 48px;
+    }
+
+    .gift .box {
+      bottom: 0;
+      height: 112px;
+    }
+
+    .gift .ribbon-v,
+    .gift .ribbon-h {
+      position: absolute;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      border-radius: 5px;
+      z-index: 2;
+    }
+
+    .gift .ribbon-v {
+      left: 77px;
+      top: 0;
+      width: 36px;
+      height: 160px;
+    }
+
+    .gift .ribbon-h {
+      left: -9px;
+      top: 58px;
+      width: 208px;
+      height: 34px;
+    }
+
+    .gift .bow {
+      position: absolute;
+      top: -42px;
+      left: 43px;
+      width: 104px;
+      height: 58px;
+      z-index: 3;
+    }
+
+    .gift .bow::before,
+    .gift .bow::after {
+      content: "";
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      border: 12px solid var(--cyan);
+      border-radius: 50% 50% 10px 50%;
+      transform: rotate(-28deg);
+    }
+
+    .gift .bow::after {
+      right: 0;
+      transform: scaleX(-1) rotate(-28deg);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .tab {
+      width: 100%;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: none;
+    }
+
+    .tab.active {
+      color: #061016;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      border-color: transparent;
+    }
+
+    .stage {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 30px 80px var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 42px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--pink);
+    }
+
+    .dot:nth-child(2) {
+      background: var(--gold);
+    }
+
+    .dot:nth-child(3) {
+      background: var(--green);
+    }
+
+    .file {
+      margin-left: 8px;
+      color: var(--muted);
+      font: 13px/1 "SFMono-Regular", Consolas, monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .panel {
+      display: none;
+      min-height: 300px;
+      padding: 28px;
+    }
+
+    .panel.active {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .panel p {
+      margin: 0;
+      color: #dfe8f6;
+      font-size: 18px;
+      line-height: 1.62;
+    }
+
+    .code {
+      margin: 0;
+      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      color: #edf7ff;
+      background: rgba(0, 0, 0, 0.20);
+      font: 15px/1.65 "SFMono-Regular", Consolas, monospace;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .photo-card {
+      position: relative;
+      min-height: 220px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(84, 216, 255, 0.16), rgba(255, 108, 174, 0.16)),
+        rgba(255, 255, 255, 0.07);
+    }
+
+    .photo-card::before {
+      content: attr(data-placeholder);
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      color: var(--soft);
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .photo-card:not(.missing)::before {
+      display: none;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-card.missing img {
+      display: none;
+    }
+
+    .photo-card figcaption {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(5, 9, 18, 0.68);
+      backdrop-filter: blur(10px);
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .memory,
+    .coupon {
+      min-height: 116px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .memory b,
+    .coupon b {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--gold);
+    }
+
+    .memory span,
+    .coupon span {
+      color: var(--soft);
+      line-height: 1.45;
+    }
+
+    .gift-box {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .mini-gift {
+      width: 160px;
+      height: 130px;
+      margin: auto;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .mini-gift::before,
+    .mini-gift::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--pink), #ff9b6a);
+    }
+
+    .mini-gift::before {
+      top: 0;
+      height: 42px;
+      transition: transform 0.3s ease;
+    }
+
+    .mini-gift::after {
+      bottom: 0;
+      height: 90px;
+    }
+
+    .mini-gift.open::before {
+      transform: translateY(-24px) rotate(-8deg);
+    }
+
+    .mini-gift span {
+      position: absolute;
+      z-index: 2;
+      left: 64px;
+      top: 0;
+      width: 32px;
+      height: 130px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tiny-button {
+      min-height: 42px;
+      box-shadow: none;
+    }
+
+    .toast {
+      min-height: 20px;
+      color: var(--green);
+      font-size: 14px;
+    }
+
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0) rotate(-2deg);
+      }
+
+      50% {
+        transform: translateY(-16px) rotate(2deg);
+      }
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        width: min(100vw - 32px, 680px);
+        padding-top: 24px;
+        align-content: start;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .gift-art {
+        min-height: 240px;
+      }
+
+      .gift {
+        transform: scale(0.82);
+      }
+
+      h1 {
+        font-size: 56px;
+      }
+
+      .lead {
+        font-size: 18px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cards,
+      .photo-grid,
+      .gift-box {
+        grid-template-columns: 1fr;
+      }
+
+      .name-row {
+        grid-template-columns: 1fr;
+      }
+
+      input,
+      .primary {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .page {
+        width: calc(100vw - 28px);
+      }
+
+      h1 {
+        font-size: 46px;
+      }
+
+      .panel {
+        padding: 20px;
+      }
+
+      .panel h2 {
+        font-size: 28px;
+      }
+
+      .panel p {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <main class="page">
+    <section class="hero" aria-label="Birthday surprise">
+      <div class="intro">
+        <div class="tag">distance === "temporary"</div>
+        <h1>Happy <span class="pink">Birthday</span></h1>
+        <p class="lead" id="heroText">Meri favourite girl ke liye ek tiny website, jisme love compile hota hai aur missing-you ka server hamesha online rehta hai.</p>
+        <div class="name-row">
+          <label for="name">Name</label>
+          <input id="name" autocomplete="off" placeholder="Uska naam likho">
+          <button class="primary" id="makeLink" type="button">Make link</button>
+        </div>
+      </div>
+
+      <div class="gift-art" aria-hidden="true">
+        <div class="gift">
+          <span class="bow"></span>
+          <span class="lid"></span>
+          <span class="box"></span>
+          <span class="ribbon-v"></span>
+          <span class="ribbon-h"></span>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Surprise sections">
+      <button class="tab active" type="button" data-tab="surprise">Surprise</button>
+      <button class="tab" type="button" data-tab="gift">Gift</button>
+      <button class="tab" type="button" data-tab="memories">Memories</button>
+      <button class="tab" type="button" data-tab="distance">Distance</button>
+      <button class="tab" type="button" data-tab="final">Final Wish</button>
+    </nav>
+
+    <section class="stage">
+      <div class="window-bar">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="file" id="fileName">surprise.js</span>
+      </div>
+
+      <article class="panel active" id="surprise">
+        <h2>Surprise unlocked</h2>
+        <p id="surpriseText">Aaj ka day special hai, kyunki duniya me woh person launch hua jiske bina meri daily routine incomplete lagti hai.</p>
+        <pre class="code" id="surpriseCode"></pre>
+      </article>
+
+      <article class="panel" id="gift">
+        <h2>Virtual gift box</h2>
+        <div class="gift-box">
+          <div class="mini-gift" id="miniGift" role="button" tabindex="0" aria-label="Open gift"><span></span></div>
+          <div>
+            <p id="giftText">Is box ke andar koi expensive thing nahi, but three useful coupons hain: ek long call, ek food treat, aur ek real gift jab milenge.</p>
+            <div class="cards">
+              <div class="coupon"><b>Call coupon</b><span>No timer. Bas tu, main, aur full attention.</span></div>
+              <div class="coupon"><b>Treat coupon</b><span>Jo craving bolegi, woh plan hoga.</span></div>
+              <div class="coupon"><b>Meet coupon</b><span>Next meet pe ek proper birthday hug pending.</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel" id="memories">
+        <h2>Memory stack</h2>
+        <p>Photos na bhi ho, kuch moments dil ke local storage mein permanently saved rehte hain.</p>
+        <div class="photo-grid" aria-label="Photo memories">
+          <figure class="photo-card missing" data-placeholder="Add photos/photo1.jpg">
+            <img src="photos/photo1.jpg" alt="Favourite memory photo" onload="this.closest('.photo-card').classList.remove('missing')">
+            <figcaption>Favourite moment</figcaption>
+          </figure>
+          <figure class="photo-card missing" data-placeholder="Add photos/photo2.jpg">
+            <img src="photos/photo2.jpg" alt="Cute memory photo" onload="this.closest('.photo-card').classList.remove('missing')">
+            <figcaption>Cute memory</figcaption>
+          </figure>
+          <figure class="photo-card missing" data-placeholder="Add photos/photo3.jpg">
+            <img src="photos/photo3.jpg" alt="Future memory photo" onload="this.closest('.photo-card').classList.remove('missing')">
+            <figcaption>Next meet soon</figcaption>
+          </figure>
+        </div>
+        <div class="cards">
+          <div class="memory"><b>First ping</b><span>Jab normal chat slowly favourite notification ban gayi.</span></div>
+          <div class="memory"><b>Late calls</b><span>Jahan time ka pata nahi chalta, bas smile aa jati hai.</span></div>
+          <div class="memory"><b>Future plan</b><span>Ek day jab distance close hoga aur yeh page real hug mein convert hoga.</span></div>
+        </div>
+      </article>
+
+      <article class="panel" id="distance">
+        <h2>Long distance mode</h2>
+        <p id="distanceText">Hum dur rehte hain, par connection weak nahi hai. Distance sirf map pe dikh raha hai, feelings mein nahi.</p>
+        <pre class="code">const distance = "kilometers";
+const connection = "heart-to-heart";
+const missingYou = true;
+
+if (distance) {
+  love.increase();
+  patience.keep();
+  videoCall.schedule();
+}</pre>
+      </article>
+
+      <article class="panel" id="final">
+        <h2>Final wish</h2>
+        <p id="finalWish"></p>
+        <div class="actions">
+          <button class="tiny-button" id="copyWish" type="button">Copy wish</button>
+          <button class="tiny-button" id="shareWish" type="button">Share</button>
+        </div>
+        <div class="toast" id="toast" aria-live="polite"></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const nameInput = document.querySelector("#name");
+    const heroText = document.querySelector("#heroText");
+    const surpriseText = document.querySelector("#surpriseText");
+    const surpriseCode = document.querySelector("#surpriseCode");
+    const giftText = document.querySelector("#giftText");
+    const distanceText = document.querySelector("#distanceText");
+    const finalWish = document.querySelector("#finalWish");
+    const toast = document.querySelector("#toast");
+    const fileName = document.querySelector("#fileName");
+    const tabs = document.querySelectorAll(".tab");
+    const panels = document.querySelectorAll(".panel");
+    const miniGift = document.querySelector("#miniGift");
+
+    const params = new URLSearchParams(location.search);
+    const initialName = params.get("name") || "RUH ❤️";
+    nameInput.value = initialName;
+
+    function cleanName() {
+      return nameInput.value.trim() || "RUH ❤️";
+    }
+
+    function currentWish() {
+      const name = cleanName();
+      return `Happy Birthday ${name}. Hum dur zaroor hain, par tu mere har thought, har smile aur har dua mein close rehti hai. Distance bas network latency hai, connection humara permanent hai. May your life run with zero bugs, infinite happiness, and forever love.`;
+    }
+
+    function updateCopy() {
+      const name = cleanName();
+      heroText.textContent = `${name} ke liye ek tiny website, jisme love compile hota hai aur missing-you ka server hamesha online rehta hai.`;
+      surpriseText.textContent = `Aaj ka day special hai, kyunki duniya me ${name} ko launch kiya hai aur meri life ka best feature online aa gaya.`;
+      giftText.textContent = `${name}, is box ke andar koi expensive thing nahi, but three useful coupons hain: ek long call, ek food treat, aur ek real gift jab milenge.`;
+      distanceText.textContent = `${name}, hum dur rehte hain, par connection weak nahi hai. Distance sirf map pe dikh raha hai, feelings mein nahi.`;
+      finalWish.textContent = currentWish();
+      surpriseCode.textContent = `const birthdayGirl = "${name}";
+const distance = "temporary";
+let love = Infinity;
+
+deploy({
+  wish: "Happy Birthday",
+  smiles: "unlimited",
+  hugs: "pending till we meet",
+  promise: "I am always one call away"
+});`;
+    }
+
+    function setTab(id) {
+      tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === id));
+      panels.forEach((panel) => panel.classList.toggle("active", panel.id === id));
+      fileName.textContent = `${id}.js`;
+      burst();
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => setTab(tab.dataset.tab));
+    });
+
+    nameInput.addEventListener("input", updateCopy);
+
+    document.querySelector("#makeLink").addEventListener("click", async () => {
+      const url = new URL(location.href);
+      url.searchParams.set("name", cleanName());
+      history.replaceState(null, "", url);
+      await copyText(url.href);
+      toast.textContent = "Personal link copied.";
+      burst();
+    });
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.focus();
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+    }
+
+    document.querySelector("#copyWish").addEventListener("click", async () => {
+      await copyText(currentWish());
+      toast.textContent = "Wish copied.";
+    });
+
+    document.querySelector("#shareWish").addEventListener("click", async () => {
+      if (navigator.share) {
+        await navigator.share({ title: "Birthday Wish", text: currentWish(), url: location.href });
+      } else {
+        await copyText(currentWish());
+        toast.textContent = "Share text copied.";
+      }
+    });
+
+    function openGift() {
+      miniGift.classList.toggle("open");
+      burst();
+    }
+
+    miniGift.addEventListener("click", openGift);
+    miniGift.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openGift();
+      }
+    });
+
+    const canvas = document.querySelector("#sky");
+    const ctx = canvas.getContext("2d");
+    const tokens = ["0", "1", "<3", "{}", "=>", "++", "if", "&&"];
+    let rain = [];
+    let confetti = [];
+
+    function resize() {
+      const ratio = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(innerWidth * ratio);
+      canvas.height = Math.floor(innerHeight * ratio);
+      canvas.style.width = `${innerWidth}px`;
+      canvas.style.height = `${innerHeight}px`;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      rain = Array.from({ length: Math.ceil(innerWidth / 42) }, (_, index) => ({
+        x: index * 42,
+        y: Math.random() * innerHeight,
+        speed: 0.35 + Math.random() * 0.8
+      }));
+    }
+
+    function burst() {
+      confetti = Array.from({ length: 90 }, () => ({
+        x: innerWidth * (0.18 + Math.random() * 0.66),
+        y: innerHeight * (0.14 + Math.random() * 0.46),
+        vx: -4 + Math.random() * 8,
+        vy: -5 + Math.random() * 3,
+        size: 3 + Math.random() * 6,
+        color: ["#54d8ff", "#ff6cae", "#8cff8a", "#ffd36c", "#b5a7ff"][Math.floor(Math.random() * 5)],
+        life: 80 + Math.random() * 50
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ctx.font = "14px Consolas, monospace";
+      ctx.textAlign = "center";
+
+      for (const drop of rain) {
+        ctx.fillStyle = "rgba(203, 213, 225, 0.13)";
+        ctx.fillText(tokens[Math.floor(Math.random() * tokens.length)], drop.x, drop.y);
+        drop.y += drop.speed;
+        if (drop.y > innerHeight + 20) drop.y = -20;
+      }
+
+      for (const bit of confetti) {
+        ctx.globalAlpha = Math.max(bit.life / 120, 0);
+        ctx.fillStyle = bit.color;
+        ctx.fillRect(bit.x, bit.y, bit.size, bit.size);
+        bit.x += bit.vx;
+        bit.y += bit.vy;
+        bit.vy += 0.12;
+        bit.life -= 1;
+      }
+
+      ctx.globalAlpha = 1;
+      confetti = confetti.filter((bit) => bit.life > 0);
+      requestAnimationFrame(draw);
+    }
+
+    addEventListener("resize", resize);
+    resize();
+    updateCopy();
+    draw();
+    setTimeout(burst, 400);
+  </script>
+</body>
+</html>
